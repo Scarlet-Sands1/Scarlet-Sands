@@ -22,10 +22,14 @@ Create these UMG widget blueprints in the Unreal Editor:
 - **Required Widgets** (must use BindWidget names):
   - `NewGameButton` (Button) - Starts new game or shows overwrite confirmation
   - `ContinueButton` (Button) - Loads existing save (enabled only if save exists)
+  - `LoadGameButton` (Button) - Opens load game screen **(v1: Disabled with "(Coming Soon)" label)**
   - `SettingsButton` (Button) - Opens settings menu
   - `CreditsButton` (Button) - Opens credits screen
   - `QuitButton` (Button) - Shows quit confirmation dialog
 - **Layout**: Vertical list, centered on screen
+- **Button Order**: Per UX spec, buttons must be in this exact order from top to bottom
+- **Focus**: Initial focus on Continue (if save exists), otherwise New Game
+- **Navigation**: D-pad/Arrow keys move between buttons, mouse hover updates focus
 
 ### WBP_Settings
 - **Parent Class**: SettingsWidget (C++)

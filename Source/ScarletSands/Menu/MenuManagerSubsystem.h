@@ -15,6 +15,7 @@ enum class EMenuScreen : uint8
 	None,
 	TitleRoot,
 	MainMenu,
+	LoadGame,
 	Settings,
 	Credits,
 	ConfirmDialog
@@ -57,6 +58,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Menu Manager")
 	void ShowCredits();
+
+	UFUNCTION(BlueprintCallable, Category = "Menu Manager")
+	void ShowLoadGame();
 
 	UFUNCTION(BlueprintCallable, Category = "Menu Manager")
 	void ShowConfirmDialog(const FText& Title, const FText& Message, const FSimpleDelegate& OnConfirm, const FSimpleDelegate& OnCancel);

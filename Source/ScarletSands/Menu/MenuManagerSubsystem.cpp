@@ -104,6 +104,11 @@ void UMenuManagerSubsystem::ShowCredits()
 	PushScreen(EMenuScreen::Credits);
 }
 
+void UMenuManagerSubsystem::ShowLoadGame()
+{
+	PushScreen(EMenuScreen::LoadGame);
+}
+
 void UMenuManagerSubsystem::ShowConfirmDialog(const FText& Title, const FText& Message,
 	const FSimpleDelegate& OnConfirm, const FSimpleDelegate& OnCancel)
 {
