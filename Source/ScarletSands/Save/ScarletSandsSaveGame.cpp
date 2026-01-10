@@ -4,6 +4,7 @@
 
 UScarletSandsSaveGame::UScarletSandsSaveGame()
 {
+	SaveVersion = 1;
 	PlayerName = TEXT("Kai");
 	PlayerLocation = FVector::ZeroVector;
 	PlayerRotation = FRotator::ZeroRotator;
@@ -15,6 +16,7 @@ UScarletSandsSaveGame::UScarletSandsSaveGame()
 void UScarletSandsSaveGame::InitializeNewGame()
 {
 	// Reset to default new game state
+	SaveVersion = 1;
 	PlayerName = TEXT("Kai");
 	PlayerLocation = FVector::ZeroVector;
 	PlayerRotation = FRotator::ZeroRotator;

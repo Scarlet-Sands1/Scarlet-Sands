@@ -7,6 +7,17 @@
 UScarletSandsGameInstance::UScarletSandsGameInstance()
 {
 	DefaultSaveSlot = TEXT("SS_MainSlot");
+	GameVersion = TEXT("1.0.0");
+
+	#if UE_BUILD_SHIPPING
+		BuildConfiguration = TEXT("Shipping");
+	#elif UE_BUILD_DEVELOPMENT
+		BuildConfiguration = TEXT("Development");
+	#elif UE_BUILD_DEBUG
+		BuildConfiguration = TEXT("Debug");
+	#else
+		BuildConfiguration = TEXT("Unknown");
+	#endif
 }
 
 void UScarletSandsGameInstance::Init()
@@ -78,4 +89,14 @@ void UScarletSandsGameInstance::LoadTitleScreen()
 void UScarletSandsGameInstance::LoadGameWorld()
 {
 	UGameplayStatics::OpenLevel(this, FName(TEXT("L_World_Persistent")));
+}
+
+FString UScarletSandsGameInstance::GetVersionString() const
+{
+	return GameVersion;
+}
+
+FString UScarletSandsGameInstance::GetBuildInfo() const
+{
+	return FString::Printf(TEXT("v%s (%s)"), *GameVersion, *BuildConfiguration);
 }
