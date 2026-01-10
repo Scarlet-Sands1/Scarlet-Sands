@@ -19,6 +19,7 @@ class SCARLETSANDS_API UMainMenuWidget : public UMenuWidgetBase
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 protected:
 	// Button references (bound in UMG)
@@ -27,6 +28,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* ContinueButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* LoadGameButton;
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* SettingsButton;
@@ -45,6 +49,9 @@ protected:
 	void OnContinueClicked();
 
 	UFUNCTION()
+	void OnLoadGameClicked();
+
+	UFUNCTION()
 	void OnSettingsClicked();
 
 	UFUNCTION()
@@ -53,8 +60,33 @@ protected:
 	UFUNCTION()
 	void OnQuitClicked();
 
+	// Hover callbacks for mouse focus update
+	UFUNCTION()
+	void OnNewGameHovered();
+
+	UFUNCTION()
+	void OnContinueHovered();
+
+	UFUNCTION()
+	void OnLoadGameHovered();
+
+	UFUNCTION()
+	void OnSettingsHovered();
+
+	UFUNCTION()
+	void OnCreditsHovered();
+
+	UFUNCTION()
+	void OnQuitHovered();
+
 private:
 	void UpdateContinueButtonState();
 	void BindButtonEvents();
 	bool DoesSaveExist() const;
+	void SetInitialFocus();
+	void UpdateLoadGameButtonState();
+
+	// Navigation order for buttons (top to bottom)
+	TArray<UButton*> NavigationOrder;
+	int32 CurrentFocusIndex;
 };
