@@ -39,10 +39,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level Management")
 	void LoadGameWorld();
 
+	// Version and build info
+	UFUNCTION(BlueprintCallable, Category = "Game Info")
+	FString GetVersionString() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Game Info")
+	FString GetBuildInfo() const;
+
 protected:
 	// Default save slot name
 	UPROPERTY(EditDefaultsOnly, Category = "Save System")
 	FString DefaultSaveSlot;
+
+	// Version information
+	UPROPERTY(EditDefaultsOnly, Category = "Game Info")
+	FString GameVersion;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Game Info")
+	FString BuildConfiguration;
 
 private:
 	void InitializeDefaultSaveSlot();

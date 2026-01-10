@@ -9,6 +9,7 @@
 class UButton;
 class USlider;
 class UCheckBox;
+class UComboBoxString;
 
 /**
  * Settings Widget - handles Graphics, Audio, and Controls settings
@@ -31,6 +32,19 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	USlider* SFXVolumeSlider;
+
+	// Graphics settings
+	UPROPERTY(meta = (BindWidget))
+	UComboBoxString* WindowModeComboBox;
+
+	UPROPERTY(meta = (BindWidget))
+	UComboBoxString* ResolutionComboBox;
+
+	UPROPERTY(meta = (BindWidget))
+	UCheckBox* VSyncCheckBox;
+
+	UPROPERTY(meta = (BindWidget))
+	UComboBoxString* QualityPresetComboBox;
 
 	// Control settings
 	UPROPERTY(meta = (BindWidget))
@@ -56,6 +70,19 @@ protected:
 	UFUNCTION()
 	void OnSFXVolumeChanged(float Value);
 
+	// Graphics callbacks
+	UFUNCTION()
+	void OnWindowModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+	UFUNCTION()
+	void OnResolutionChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+	UFUNCTION()
+	void OnVSyncChanged(bool bIsChecked);
+
+	UFUNCTION()
+	void OnQualityPresetChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
 	// Control callbacks
 	UFUNCTION()
 	void OnMouseSensitivityChanged(float Value);
@@ -75,6 +102,9 @@ private:
 	void LoadSettings();
 	void ApplySettings();
 	void SaveSettings();
+	void InitializeGraphicsOptions();
+	bool HasUnsavedChanges() const;
+	void ShowDiscardConfirmation();
 
 	// Cached sound classes
 	UPROPERTY()
@@ -86,10 +116,29 @@ private:
 	UPROPERTY()
 	class USoundClass* SFXSoundClass;
 
-	// Current settings values
+	// Current settings values (Audio)
 	float CurrentMasterVolume;
 	float CurrentMusicVolume;
 	float CurrentSFXVolume;
+
+	// Current settings values (Graphics)
+	int32 CurrentWindowMode;
+	FIntPoint CurrentResolution;
+	bool bCurrentVSync;
+	int32 CurrentQualityPreset;
+
+	// Current settings values (Controls)
 	float CurrentMouseSensitivity;
 	bool bCurrentInvertY;
+
+	// Saved settings values for dirty checking
+	float SavedMasterVolume;
+	float SavedMusicVolume;
+	float SavedSFXVolume;
+	int32 SavedWindowMode;
+	FIntPoint SavedResolution;
+	bool bSavedVSync;
+	int32 SavedQualityPreset;
+	float SavedMouseSensitivity;
+	bool bSavedInvertY;
 };

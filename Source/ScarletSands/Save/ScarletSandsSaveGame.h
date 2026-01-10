@@ -20,6 +20,10 @@ public:
 	// Initialize a new game save
 	void InitializeNewGame();
 
+	// Save file version
+	UPROPERTY(VisibleAnywhere, Category = "Save Data")
+	int32 SaveVersion;
+
 	// Player progress data
 	UPROPERTY(VisibleAnywhere, Category = "Save Data")
 	FString PlayerName;

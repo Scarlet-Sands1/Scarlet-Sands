@@ -15,6 +15,7 @@ enum class EMenuScreen : uint8
 	None,
 	TitleRoot,
 	MainMenu,
+	LoadGame,
 	Settings,
 	Credits,
 	ConfirmDialog

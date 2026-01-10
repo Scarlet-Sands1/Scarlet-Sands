@@ -36,7 +36,25 @@ Canvas Panel (Root)
 │   ├── Horizontal Divider
 │   ├── Graphics Section (Vertical Box)
 │   │   ├── Section Header: "Graphics"
-│   │   └── Note: "(Use UGameUserSettings for quality, resolution, etc.)"
+│   │   ├── Window Mode Row (Horizontal Box)
+│   │   │   ├── Label: "Window Mode"
+│   │   │   └── WindowModeComboBox (ComboBoxString) ← BindWidget REQUIRED
+│   │   │       ├── Options: "Fullscreen", "Windowed", "Borderless Fullscreen"
+│   │   │       └── Default: "Borderless Fullscreen"
+│   │   ├── Resolution Row (Horizontal Box)
+│   │   │   ├── Label: "Resolution"
+│   │   │   └── ResolutionComboBox (ComboBoxString) ← BindWidget REQUIRED
+│   │   │       ├── Options: "1280x720", "1600x900", "1920x1080", "2560x1440", "3840x2160"
+│   │   │       └── Default: "1920x1080"
+│   │   ├── VSync Row (Horizontal Box)
+│   │   │   ├── Label: "VSync"
+│   │   │   └── VSyncCheckBox (CheckBox) ← BindWidget REQUIRED
+│   │   │       └── Default: Checked
+│   │   └── Quality Preset Row (Horizontal Box)
+│   │       ├── Label: "Quality"
+│   │       └── QualityPresetComboBox (ComboBoxString) ← BindWidget REQUIRED
+│   │           ├── Options: "Low", "Medium", "High", "Epic"
+│   │           └── Default: "High"
 │   ├── Horizontal Divider
 │   ├── Controls Section (Vertical Box)
 │   │   ├── Section Header: "Controls"
@@ -62,11 +80,23 @@ Canvas Panel (Root)
 ## BindWidget Requirements
 
 Variable names MUST match C++ exactly:
+
+**Audio:**
 - `MasterVolumeSlider`
 - `MusicVolumeSlider`
 - `SFXVolumeSlider`
+
+**Graphics:**
+- `WindowModeComboBox`
+- `ResolutionComboBox`
+- `VSyncCheckBox`
+- `QualityPresetComboBox`
+
+**Controls:**
 - `MouseSensitivitySlider`
 - `InvertYCheckBox`
+
+**Buttons:**
 - `ApplyButton`
 - `BackButton`
 
@@ -102,6 +132,14 @@ Repeat for Music, SFX, and MouseSensitivity sliders.
   - MusicVolumeSlider → SC_Music.Volume
   - SFXVolumeSlider → SC_SFX.Volume
 
+### Graphics Settings
+- Window Mode: Fullscreen (0), Windowed (1), Borderless Fullscreen (2)
+- Resolution: Standard 16:9 resolutions
+- VSync: Enable/disable vertical sync
+- Quality Preset: Maps to Unreal's scalability levels (0=Low, 1=Medium, 2=High, 3=Epic)
+- Stored in GameUserSettings.ini
+- Applied when Apply button is pressed
+
 ### Mouse Sensitivity
 - Stored in SettingsSaveGame
 - Applied to player controller on load
@@ -111,13 +149,19 @@ Repeat for Music, SFX, and MouseSensitivity sliders.
 - Applied to player controller on load
 
 ### Apply Button
-- Saves all settings to SS_Settings save slot
-- Shows confirmation (optional)
+- Saves all settings:
+  - Audio/Controls → SS_Settings save slot
+  - Graphics → GameUserSettings.ini
+- Updates "saved values" for dirty checking
 - Does NOT close settings screen
 
 ### Back Button
-- Returns to main menu
-- Does NOT save changes (only Apply saves)
+- Checks for unsaved changes using dirty tracking
+- If changes exist:
+  - Shows "Discard Changes?" confirmation dialog
+  - Confirm: Discards changes and returns to main menu
+  - Cancel: Stays in settings screen
+- If no changes: Returns to main menu immediately
 - Plays back sound
 
 ## Styling
@@ -170,11 +214,21 @@ Repeat for Music, SFX, and MouseSensitivity sliders.
 - [ ] Invert Y checkbox toggles state
 - [ ] Settings persist after Apply + restart
 
+### Graphics Settings
+- [ ] Window mode dropdown has 3 options
+- [ ] Resolution dropdown shows common 16:9 resolutions
+- [ ] VSync checkbox toggles state
+- [ ] Quality preset dropdown has 4 levels
+- [ ] Graphics changes visible after Apply
+- [ ] Settings persist after Apply + restart
+
 ### Buttons
-- [ ] Apply button saves settings
+- [ ] Apply button saves all settings
+- [ ] Apply updates "saved values" for dirty checking
 - [ ] Apply doesn't close screen
-- [ ] Back button returns to main menu
-- [ ] Back doesn't save unsaved changes
+- [ ] Back button checks for unsaved changes
+- [ ] Back shows "Discard Changes?" dialog if dirty
+- [ ] Back returns to main menu if no changes
 - [ ] Escape key triggers Back
 
 ### Integration

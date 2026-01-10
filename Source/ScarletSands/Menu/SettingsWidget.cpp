@@ -4,10 +4,13 @@
 #include "Components/Button.h"
 #include "Components/Slider.h"
 #include "Components/CheckBox.h"
+#include "Components/ComboBoxString.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Sound/SoundClass.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Save/ScarletSandsSettingsSaveGame.h"
+#include "../ScarletSandsGameUserSettings.h"
+#include "MenuManagerSubsystem.h"
 
 void USettingsWidget::NativeConstruct()
 {
@@ -20,6 +23,7 @@ void USettingsWidget::NativeConstruct()
 	MusicSoundClass = LoadObject<USoundClass>(nullptr, TEXT("/Game/ScarletSands/UI/Audio/SC_Music.SC_Music"));
 	SFXSoundClass = LoadObject<USoundClass>(nullptr, TEXT("/Game/ScarletSands/UI/Audio/SC_SFX.SC_SFX"));
 
+	InitializeGraphicsOptions();
 	BindEvents();
 	LoadSettings();
 }
@@ -40,6 +44,27 @@ void USettingsWidget::BindEvents()
 	if (SFXVolumeSlider)
 	{
 		SFXVolumeSlider->OnValueChanged.AddDynamic(this, &USettingsWidget::OnSFXVolumeChanged);
+	}
+
+	// Graphics controls
+	if (WindowModeComboBox)
+	{
+		WindowModeComboBox->OnSelectionChanged.AddDynamic(this, &USettingsWidget::OnWindowModeChanged);
+	}
+
+	if (ResolutionComboBox)
+	{
+		ResolutionComboBox->OnSelectionChanged.AddDynamic(this, &USettingsWidget::OnResolutionChanged);
+	}
+
+	if (VSyncCheckBox)
+	{
+		VSyncCheckBox->OnCheckStateChanged.AddDynamic(this, &USettingsWidget::OnVSyncChanged);
+	}
+
+	if (QualityPresetComboBox)
+	{
+		QualityPresetComboBox->OnSelectionChanged.AddDynamic(this, &USettingsWidget::OnQualityPresetChanged);
 	}
 
 	// Control sliders
@@ -67,7 +92,7 @@ void USettingsWidget::BindEvents()
 
 void USettingsWidget::LoadSettings()
 {
-	// Load or create settings save game
+	// Load audio/control settings from save game
 	UScarletSandsSettingsSaveGame* Settings = Cast<UScarletSandsSettingsSaveGame>(
 		UGameplayStatics::CreateSaveGameObject(UScarletSandsSettingsSaveGame::StaticClass())
 	);
@@ -81,7 +106,7 @@ void USettingsWidget::LoadSettings()
 			Settings->ApplyDefaults();
 		}
 
-		// Set slider values
+		// Set audio slider values
 		if (MasterVolumeSlider)
 		{
 			MasterVolumeSlider->SetValue(Settings->MasterVolume);
@@ -107,16 +132,61 @@ void USettingsWidget::LoadSettings()
 			InvertYCheckBox->SetIsChecked(Settings->bInvertYAxis);
 		}
 
-		// Cache current values
+		// Cache current audio/control values
 		CurrentMasterVolume = Settings->MasterVolume;
 		CurrentMusicVolume = Settings->MusicVolume;
 		CurrentSFXVolume = Settings->SFXVolume;
 		CurrentMouseSensitivity = Settings->MouseSensitivity;
 		bCurrentInvertY = Settings->bInvertYAxis;
-
-		// Apply audio settings immediately
-		ApplySettings();
 	}
+
+	// Load graphics settings from GameUserSettings
+	UScarletSandsGameUserSettings* GameSettings = UScarletSandsGameUserSettings::GetScarletSandsGameUserSettings();
+	if (GameSettings)
+	{
+		GameSettings->LoadSettings();
+
+		CurrentWindowMode = GameSettings->GetWindowModePreference();
+		CurrentResolution = GameSettings->GetScreenResolution();
+		bCurrentVSync = GameSettings->IsVSyncEnabled();
+		CurrentQualityPreset = GameSettings->GetQualityPreset();
+
+		// Set graphics UI values
+		if (WindowModeComboBox)
+		{
+			WindowModeComboBox->SetSelectedIndex(CurrentWindowMode);
+		}
+
+		if (ResolutionComboBox)
+		{
+			FString ResString = FString::Printf(TEXT("%dx%d"), CurrentResolution.X, CurrentResolution.Y);
+			ResolutionComboBox->SetSelectedOption(ResString);
+		}
+
+		if (VSyncCheckBox)
+		{
+			VSyncCheckBox->SetIsChecked(bCurrentVSync);
+		}
+
+		if (QualityPresetComboBox)
+		{
+			QualityPresetComboBox->SetSelectedIndex(CurrentQualityPreset);
+		}
+	}
+
+	// Save initial values for dirty checking
+	SavedMasterVolume = CurrentMasterVolume;
+	SavedMusicVolume = CurrentMusicVolume;
+	SavedSFXVolume = CurrentSFXVolume;
+	SavedWindowMode = CurrentWindowMode;
+	SavedResolution = CurrentResolution;
+	bSavedVSync = bCurrentVSync;
+	SavedQualityPreset = CurrentQualityPreset;
+	SavedMouseSensitivity = CurrentMouseSensitivity;
+	bSavedInvertY = bCurrentInvertY;
+
+	// Apply audio settings immediately
+	ApplySettings();
 }
 
 void USettingsWidget::ApplySettings()
@@ -137,10 +207,14 @@ void USettingsWidget::ApplySettings()
 		SFXSoundClass->Properties.Volume = CurrentSFXVolume;
 	}
 
-	// Graphics settings would be applied here using UGameUserSettings
-	UGameUserSettings* GameSettings = UGameUserSettings::GetGameUserSettings();
+	// Apply graphics settings using GameUserSettings
+	UScarletSandsGameUserSettings* GameSettings = UScarletSandsGameUserSettings::GetScarletSandsGameUserSettings();
 	if (GameSettings)
 	{
+		GameSettings->SetWindowModePreference(CurrentWindowMode);
+		GameSettings->SetScreenResolution(CurrentResolution);
+		GameSettings->SetVSyncEnabled(bCurrentVSync);
+		GameSettings->SetQualityPreset(CurrentQualityPreset);
 		GameSettings->ApplySettings(false);
 	}
 
@@ -149,7 +223,7 @@ void USettingsWidget::ApplySettings()
 
 void USettingsWidget::SaveSettings()
 {
-	// Create and save settings
+	// Save audio/control settings
 	UScarletSandsSettingsSaveGame* Settings = Cast<UScarletSandsSettingsSaveGame>(
 		UGameplayStatics::CreateSaveGameObject(UScarletSandsSettingsSaveGame::StaticClass())
 	);
@@ -164,6 +238,24 @@ void USettingsWidget::SaveSettings()
 
 		Settings->SaveSettings();
 	}
+
+	// Save graphics settings
+	UScarletSandsGameUserSettings* GameSettings = UScarletSandsGameUserSettings::GetScarletSandsGameUserSettings();
+	if (GameSettings)
+	{
+		GameSettings->SaveSettings();
+	}
+
+	// Update saved values for dirty checking
+	SavedMasterVolume = CurrentMasterVolume;
+	SavedMusicVolume = CurrentMusicVolume;
+	SavedSFXVolume = CurrentSFXVolume;
+	SavedWindowMode = CurrentWindowMode;
+	SavedResolution = CurrentResolution;
+	bSavedVSync = bCurrentVSync;
+	SavedQualityPreset = CurrentQualityPreset;
+	SavedMouseSensitivity = CurrentMouseSensitivity;
+	bSavedInvertY = bCurrentInvertY;
 }
 
 void USettingsWidget::OnMasterVolumeChanged(float Value)
@@ -213,5 +305,113 @@ void USettingsWidget::OnApplyClicked()
 void USettingsWidget::OnBackClicked()
 {
 	PlayBackSound();
-	HandleBackPressed();
+
+	// Check for unsaved changes
+	if (HasUnsavedChanges())
+	{
+		ShowDiscardConfirmation();
+	}
+	else
+	{
+		HandleBackPressed();
+	}
+}
+
+void USettingsWidget::InitializeGraphicsOptions()
+{
+	// Initialize Window Mode options
+	if (WindowModeComboBox)
+	{
+		WindowModeComboBox->ClearOptions();
+		WindowModeComboBox->AddOption(TEXT("Fullscreen"));
+		WindowModeComboBox->AddOption(TEXT("Windowed"));
+		WindowModeComboBox->AddOption(TEXT("Borderless Fullscreen"));
+	}
+
+	// Initialize Resolution options (common 16:9 resolutions)
+	if (ResolutionComboBox)
+	{
+		ResolutionComboBox->ClearOptions();
+		ResolutionComboBox->AddOption(TEXT("1280x720"));
+		ResolutionComboBox->AddOption(TEXT("1600x900"));
+		ResolutionComboBox->AddOption(TEXT("1920x1080"));
+		ResolutionComboBox->AddOption(TEXT("2560x1440"));
+		ResolutionComboBox->AddOption(TEXT("3840x2160"));
+	}
+
+	// Initialize Quality Preset options
+	if (QualityPresetComboBox)
+	{
+		QualityPresetComboBox->ClearOptions();
+		QualityPresetComboBox->AddOption(TEXT("Low"));
+		QualityPresetComboBox->AddOption(TEXT("Medium"));
+		QualityPresetComboBox->AddOption(TEXT("High"));
+		QualityPresetComboBox->AddOption(TEXT("Epic"));
+	}
+}
+
+void USettingsWidget::OnWindowModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
+{
+	if (WindowModeComboBox)
+	{
+		CurrentWindowMode = WindowModeComboBox->GetSelectedIndex();
+	}
+}
+
+void USettingsWidget::OnResolutionChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
+{
+	// Parse resolution string "WIDTHxHEIGHT"
+	FString LeftString, RightString;
+	if (SelectedItem.Split(TEXT("x"), &LeftString, &RightString))
+	{
+		int32 Width = FCString::Atoi(*LeftString);
+		int32 Height = FCString::Atoi(*RightString);
+		CurrentResolution = FIntPoint(Width, Height);
+	}
+}
+
+void USettingsWidget::OnVSyncChanged(bool bIsChecked)
+{
+	bCurrentVSync = bIsChecked;
+}
+
+void USettingsWidget::OnQualityPresetChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
+{
+	if (QualityPresetComboBox)
+	{
+		CurrentQualityPreset = QualityPresetComboBox->GetSelectedIndex();
+	}
+}
+
+bool USettingsWidget::HasUnsavedChanges() const
+{
+	return (CurrentMasterVolume != SavedMasterVolume) ||
+		   (CurrentMusicVolume != SavedMusicVolume) ||
+		   (CurrentSFXVolume != SavedSFXVolume) ||
+		   (CurrentWindowMode != SavedWindowMode) ||
+		   (CurrentResolution != SavedResolution) ||
+		   (bCurrentVSync != bSavedVSync) ||
+		   (CurrentQualityPreset != SavedQualityPreset) ||
+		   (CurrentMouseSensitivity != SavedMouseSensitivity) ||
+		   (bCurrentInvertY != bSavedInvertY);
+}
+
+void USettingsWidget::ShowDiscardConfirmation()
+{
+	UMenuManagerSubsystem* MenuManager = GetMenuManager();
+	if (MenuManager)
+	{
+		FSimpleDelegate OnConfirm;
+		OnConfirm.BindUObject(this, &USettingsWidget::HandleBackPressed);
+
+		FSimpleDelegate OnCancel;
+		// Do nothing on cancel - stay in settings
+
+		MenuManager->ShowConfirmDialog(
+			FText::FromString(TEXT("Discard Changes?")),
+			FText::FromString(TEXT("You have unsaved changes. Are you sure you want to discard them?")),
+			OnConfirm,
+			OnCancel
+		);
+	}
 }
