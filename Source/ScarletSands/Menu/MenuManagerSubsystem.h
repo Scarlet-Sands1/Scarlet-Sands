@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Delegates/DelegateCombinations.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "MenuManagerSubsystem.generated.h"
 
@@ -62,7 +63,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu Manager")
 	void ShowLoadGame();
 
-	UFUNCTION(BlueprintCallable, Category = "Menu Manager")
 	void ShowConfirmDialog(const FText& Title, const FText& Message, const FSimpleDelegate& OnConfirm, const FSimpleDelegate& OnCancel);
 
 	// Back navigation (called by widgets on Escape/B/Back)
