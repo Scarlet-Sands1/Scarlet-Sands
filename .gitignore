@@ -1,0 +1,53 @@
+# Unreal Engine Build Files
+Binaries/
+Build/
+Intermediate/
+DerivedDataCache/
+Saved/
+
+# Unreal Engine Generated Files
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+.vs/
+
+# Visual Studio / Rider
+.vscode/
+.idea/
+*.code-workspace
+
+# Unreal Engine Cache and Temp Files
+FileOpenOrder/
+*.tmp
+*_BuiltData.uasset
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.log
+
+# User-specific files
+*.user
+*.userprefs
+
+# Crash Reports
+/Crashes/
+
+# Don't ignore .uproject, .Target.cs, or source files
+!*.uproject
+!*.Target.cs
+!*.Build.cs
+!Source/**
+!Config/**
+!Content/**/*.uasset
+!Content/**/*.umap
+
+# Plugins
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Starter Content (optional - uncomment if you want to exclude it)
+# Content/StarterContent/
